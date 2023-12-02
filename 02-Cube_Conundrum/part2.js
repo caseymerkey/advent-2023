@@ -1,11 +1,6 @@
 const fs = require('fs');
 const readline = require('readline');
 
-const bag = {
-    "red": 12,
-    "green": 13,
-    "blue": 14
-}
 
 async function readInputFile(inputFile) {
 
@@ -29,14 +24,14 @@ function parseGame(gameString) {
     let str = gameString.split(':')
 
     let game = {
-        "gameNumber": parseInt(str[0].substring(5)),
-        "draws": []
+        'gameNumber': parseInt(str[0].substring(5)),
+        'draws': []
     };
     
     drawResults = str[1].trim().split(';');
     drawResults.forEach((dr) => {
         let countsDict = parseDraw(dr);
-        game["draws"].push(countsDict);
+        game['draws'].push(countsDict);
     });
     return game;
 }
@@ -53,16 +48,22 @@ function parseDraw(drawResult){
 
 function evaluateGame(game) {
 
-    let valid = true;
+    let minimums = {
+        'red': 0,
+        'green': 0,
+        'blue': 0
+    };
+
     game.draws.forEach((draw) => {
-        for (const [key, value] of Object.entries(draw)) {
-            if(value > bag[key]) {
-                valid = false;
-                break;
+        for (const [color, count] of Object.entries(minimums)) {
+            if (draw[color] && draw[color] > minimums[color]) {
+                minimums[color] = draw[color];
             }
         }
+
     });
-    return valid ? game.gameNumber : 0;
+    let power = minimums['red'] * minimums['green'] * minimums['blue'];
+    return power;
 }
 
 readInputFile('input.txt');
