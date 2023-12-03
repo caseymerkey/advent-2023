@@ -3,8 +3,7 @@ const readline = require('readline');
 
 async function parseInput() {
 
-    // Not sure why, but VSCode's debugger didn't like the relative path
-    const fileStream = fs.createReadStream(`${__dirname}/01-Trebuchet-input.txt`);
+    const fileStream = fs.createReadStream('01-Trebuchet-input.txt');
     const rl = readline.createInterface({
         input: fileStream,
         crlfDelay: Infinity
