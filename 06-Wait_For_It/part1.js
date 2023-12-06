@@ -15,33 +15,28 @@ async function readInputFile(inputFile) {
         crlfDelay: Infinity
     });
 
-    let times = [];
-    let distances = [];
+    let time;
+    let distance;
     for await (const line of rl) {
         if (line.startsWith('Time:')) {
-            times = line.match(/[\d]+/g);
+            time = parseInt(line.substring(5).replaceAll(' ', ''));
         } else if (line.startsWith('Distance:')) {
-            distances = line.match(/[\d]+/g);
+            distance = parseInt(line.substring(10).replaceAll(' ', ''));
         }
     }
 
-    let marginProduct = 1;
-    for (let i=0; i<times.length; i++) {
-        let a = -1
-        let b = times[i];
-        let c = (0 - distances[i]);
+    let a = -1
+    let b = time;
+    let c = (0 - distance);
 
-        let roots = findRoots(a, b, c);
-        let winStart =  Math.floor(roots[0] + 1);
-        let winEnd = Math.ceil(roots[1] - 1);
-        let m = winEnd - winStart + 1;
+    let roots = findRoots(a, b, c);
+    let winStart = Math.floor(roots[0] + 1);
+    let winEnd = Math.ceil(roots[1] - 1);
+    let m = winEnd - winStart + 1;
 
-        console.log(`Wins begin at ${winStart} and end at ${winEnd}, for a margin of ${m}`);
+    console.log(`Wins begin at ${winStart} and end at ${winEnd}, for a margin of ${m}`);
 
 
-        marginProduct = marginProduct * m;
-    }
-    console.log(`Margin product is ${marginProduct}`);
 
 }
 
