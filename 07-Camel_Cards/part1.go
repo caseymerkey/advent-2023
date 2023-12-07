@@ -69,8 +69,11 @@ func newHand(cards string, bid int) Hand {
 					value = 5
 				}
 			case 4:
+				// This is a terminal state
+				value = 4
+			case 5:
 				// was four of a kind, now five of a kind
-				value = 5
+				value = 6
 			}
 		} else {
 			if value > 0 {
