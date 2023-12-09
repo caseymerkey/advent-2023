@@ -21,7 +21,7 @@ var startTime = time.Now()
 func main() {
 
 	inputFile := "input.txt"
-	if len(os.Args) > 1 {
+	if len(os.Args) > 1 && len(os.Args[1]) > 0 {
 		inputFile = os.Args[1]
 	}
 	nodeRE := regexp.MustCompile(`([A-Z1-9]{3}) = \(([A-Z1-9]{3}), ([A-Z1-9]{3})\)`)
