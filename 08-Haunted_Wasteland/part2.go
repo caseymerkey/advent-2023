@@ -18,6 +18,8 @@ var nodeMap = map[string]Node{}
 var startingNodes []string
 var startTime = time.Now()
 
+// This doesn't work yet.
+
 func main() {
 
 	inputFile := "input.txt"
