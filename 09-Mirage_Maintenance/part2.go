@@ -37,6 +37,7 @@ func main() {
 		line := scanner.Text()
 		lineNumber++
 		numStrings := strings.Fields(line)
+		slices.Reverse(numStrings)
 		nextVal := evaluate(1, stringArrToIntArr(numStrings))
 		fmt.Printf("%s => %d \n", line, nextVal)
 		total += nextVal
