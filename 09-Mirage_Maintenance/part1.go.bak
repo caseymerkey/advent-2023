@@ -1,0 +1,42 @@
+package main
+
+import (
+	"bufio"
+	"log"
+	"os"
+	"strconv"
+	"strings"
+)
+
+func main() {
+
+	inputFile := "input.txt"
+	if len(os.Args) > 1 && len(os.Args[1]) > 0 {
+		inputFile = os.Args[1]
+	}
+
+	file, err := os.Open(inputFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+
+	total := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		total += evaluate(line)
+	}
+}
+
+func evaluate(line string) int {
+
+	numStrings := strings.Fields(line)
+
+	for i := 0; i < (len(numStrings) - 1); i++ {
+		num1, _ := strconv.Atoi(numStrings[i])
+		num2, _ := strconv.Atoi(numStrings[i+1])
+	}
+
+	return 0
+}

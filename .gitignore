@@ -3,3 +3,6 @@ input.txt
 .idea/
 out/
 instructions.md
+*.exe
+*.class
+*.iml
