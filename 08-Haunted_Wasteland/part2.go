@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -56,32 +57,39 @@ func main() {
 
 func evaluate() {
 
-	stepsTaken := 0
+	result := 0
 	directionsLength := len(directions)
 
-	for !areWeThereYet() {
-		i := stepsTaken % directionsLength
-		direction := directions[i]
-		stepsTaken++
-		for pathNumber, currentNode := range startingNodes {
-
+	for _, n := range startingNodes {
+		stepsTaken := 0
+		currentNode := nodeMap[n]
+		for !strings.HasSuffix(currentNode.name, "Z") {
+			i := stepsTaken % directionsLength
+			direction := directions[i]
+			stepsTaken++
 			if direction == 'L' {
-				startingNodes[pathNumber] = nodeMap[currentNode].L
+				currentNode = nodeMap[currentNode.L]
 			} else {
-				startingNodes[pathNumber] = nodeMap[currentNode].R
+				currentNode = nodeMap[currentNode.R]
 			}
-
+		}
+		if result == 0 {
+			result = stepsTaken
+		} else {
+			result = lcm(result, stepsTaken)
 		}
 	}
 	executionTime := float32(time.Now().Sub(startTime).Milliseconds()) / float32(1000)
-	fmt.Printf("Completed in %f seconds\nSteps Taken: %d", executionTime, stepsTaken)
+	fmt.Printf("Completed in %f seconds\nSteps Taken: %d", executionTime, result)
 }
 
-func areWeThereYet() bool {
-	for _, v := range startingNodes {
-		if v[2] != 'Z' {
-			return false
-		}
+func gcd(a, b int) int {
+	for b != 0 {
+		a, b = b, a%b
 	}
-	return true
+	return a
+}
+
+func lcm(a, b int) int {
+	return (a * b) / gcd(a, b)
 }
