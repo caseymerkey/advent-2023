@@ -40,6 +40,7 @@ func main() {
 
 	var colStrings []string
 
+	sum := 0
 	for scanner.Scan() {
 		line := scanner.Text()
 		if len(line) > 0 {
@@ -65,7 +66,7 @@ func main() {
 				n, _ := strconv.ParseInt(s, 2, 64)
 				columns = append(columns, int(n))
 			}
-			evaluate()
+			sum += evaluate()
 			colStrings = make([]string, 0)
 			columns = make([]int, 0)
 			rows = make([]int, 0)
@@ -75,24 +76,49 @@ func main() {
 		n, _ := strconv.ParseInt(s, 2, 64)
 		columns = append(columns, int(n))
 	}
-	evaluate()
+	sum += evaluate()
+	fmt.Printf("\n *** Total: %d\n", sum)
 }
 
-func evaluate() {
+func evaluate() int {
 	fmt.Printf("Rows: %v\n", rows)
 	fmt.Printf("Cols: %v\n", columns)
 
 	point := findReflectionPoint(columns)
 	if point >= 0 {
-		fmt.Printf("Found reflection at column %d", point)
+		fmt.Printf("Found reflection at column %d\n", point)
+		return point
 	} else {
 		point = findReflectionPoint(rows)
-		fmt.Printf("Found reflection at row %d", point)
+		fmt.Printf("Found reflection at row %d\n", point)
+		return point * 100
 	}
 
 }
 
 func findReflectionPoint(arr []int) int {
+	size := len(arr)
+
+	for point := 1; point < size; point++ {
+
+		broken := false
+		offset := 0
+		for !broken && ((point - offset) >= 1) && ((point + offset) < size) {
+			left := arr[point-1-offset]
+			right := arr[point+offset]
+			broken = (left != right)
+			offset++
+		}
+
+		if !broken {
+			return point
+		}
+	}
+
+	return -1
+}
+
+func findReflectionPointOld(arr []int) int {
 	for i, n := range arr {
 		fmt.Printf("%d) %08b -> %d\n", i, n, n)
 	}
