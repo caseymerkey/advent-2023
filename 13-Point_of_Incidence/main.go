@@ -7,22 +7,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
-
-type Stack []int
-
-// IsEmpty: check if stack is empty
-func (s *Stack) IsEmpty() bool {
-	return len(*s) == 0
-}
-
-// Push a new value onto the stack
-func (s *Stack) Push(n int) {
-	*s = append(*s, n) // Simply append the new value to the end of the stack
-}
-
-var rows []int
-var columns []int
 
 func main() {
 
@@ -38,9 +24,14 @@ func main() {
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
 
+	var rows []int
+	var columns []int
 	var colStrings []string
+	part1Sum := 0
+	part2Sum := 0
+	patternNumber := 1
 
-	sum := 0
+	var startTime = time.Now()
 	for scanner.Scan() {
 		line := scanner.Text()
 		if len(line) > 0 {
@@ -49,7 +40,6 @@ func main() {
 
 			n, _ := strconv.ParseInt(line, 2, 64)
 			rows = append(rows, int(n))
-
 			if len(colStrings) == 0 {
 				for i := 0; i < len(line); i++ {
 					colStrings = append(colStrings, "")
@@ -66,83 +56,84 @@ func main() {
 				n, _ := strconv.ParseInt(s, 2, 64)
 				columns = append(columns, int(n))
 			}
-			sum += evaluate()
+			p1, p2 := evaluatePattern(rows, columns)
+			fmt.Printf("Pattern %d, Part 1 Total: %d\n", patternNumber, p1)
+			fmt.Printf("Pattern %d, Part 2 Total: %d\n", patternNumber, p2)
+			part1Sum += p1
+			part2Sum += p2
 			colStrings = make([]string, 0)
 			columns = make([]int, 0)
 			rows = make([]int, 0)
+			patternNumber++
 		}
 	}
 	for _, s := range colStrings {
 		n, _ := strconv.ParseInt(s, 2, 64)
 		columns = append(columns, int(n))
 	}
-	sum += evaluate()
-	fmt.Printf("\n *** Total: %d\n", sum)
+	p1, p2 := evaluatePattern(rows, columns)
+	fmt.Printf("Pattern %d, Part 1 Total: %d\n", patternNumber, p1)
+	fmt.Printf("Pattern %d, Part 2 Total: %d\n", patternNumber, p2)
+
+	part1Sum += p1
+	part2Sum += p2
+	executionTime := float32(time.Now().Sub(startTime).Milliseconds()) / float32(1000)
+	fmt.Printf("\nCompleted in %f seconds\n", executionTime)
+	fmt.Printf("\n *** Part 1 Total: %d\n", part1Sum)
+	fmt.Printf("\n *** Part 2 Total: %d\n", part2Sum)
 }
 
-func evaluate() int {
-	fmt.Printf("Rows: %v\n", rows)
-	fmt.Printf("Cols: %v\n", columns)
+func evaluatePattern(rows []int, cols []int) (int, int) {
 
-	point := findReflectionPoint(columns)
-	if point >= 0 {
-		fmt.Printf("Found reflection at column %d\n", point)
-		return point
-	} else {
-		point = findReflectionPoint(rows)
-		fmt.Printf("Found reflection at row %d\n", point)
-		return point * 100
-	}
+	p1 := 0
+
+	fmt.Println("Rows Part 1")
+	p1 += 100 * findReflectionPoints(rows, 0)
+	fmt.Println("Columns Part 1")
+	p1 += findReflectionPoints(cols, 0)
+
+	p2 := 0
+	fmt.Println("Rows Part 2")
+	p2 += 100 * findReflectionPoints(rows, 1)
+	fmt.Println("Columns Part 1")
+	p2 += findReflectionPoints(cols, 1)
+
+	return p1, p2
 
 }
 
-func findReflectionPoint(arr []int) int {
+func findReflectionPoints(arr []int, allowedSmudges int) int {
+
 	size := len(arr)
+	total := 0
 
 	for point := 1; point < size; point++ {
-
 		broken := false
 		offset := 0
+		differencesFound := 0
+
 		for !broken && ((point - offset) >= 1) && ((point + offset) < size) {
 			left := arr[point-1-offset]
 			right := arr[point+offset]
-			broken = (left != right)
+
+			// fmt.Printf("  Comparing %d(%d) to %d(%d)... \n", point-1-offset, left, point+offset, right)
+			differencesFound += differences(left, right)
+			if differencesFound > allowedSmudges {
+				broken = true
+			}
 			offset++
 		}
-
-		if !broken {
-			return point
+		if !broken && (differencesFound == allowedSmudges) {
+			fmt.Printf("    Reflection found at %d\n", point)
+			total += point
 		}
+
 	}
 
-	return -1
+	return total
 }
 
-func findReflectionPointOld(arr []int) int {
-	for i, n := range arr {
-		fmt.Printf("%d) %08b -> %d\n", i, n, n)
-	}
-
-	point := -1
-
-	for testPosition := 0; testPosition < len(arr); testPosition++ {
-		testSpan := 0
-		broken := false
-
-		for !broken {
-			left := arr[testPosition-testSpan]
-			right := ^arr[testPosition+1+testSpan]
-			broken = (left^right > 0)
-			testSpan++
-			if (testPosition-testSpan) < 0 || (testPosition+1+testSpan) >= len(arr) {
-				break
-			}
-		}
-		if !broken {
-			point = testPosition
-			break
-		}
-	}
-
-	return point
+func differences(a int, b int) int {
+	d := a ^ b
+	return strings.Count(strconv.FormatInt(int64(d), 2), "1")
 }
