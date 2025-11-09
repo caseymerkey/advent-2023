@@ -106,15 +106,23 @@ func main() {
 	executionTime := float32(time.Since(startTime).Milliseconds()) / float32(1000)
 	fmt.Printf("Completed Part 1 in %f seconds\n", executionTime)
 
+	p2 := part2(puzzle)
+	fmt.Printf("Part 2: %d\n", p2)
+	executionTime = float32(time.Since(startTime).Milliseconds()) / float32(1000)
+	fmt.Printf("Completed Part 2 in %f seconds\n", executionTime)
 }
 
 func part1(puzzle [][]int) int {
-	target := Coord{row: len(puzzle) - 1, col: len(puzzle[0]) - 1}
-	return dijkstra(puzzle, Coord{0, 0}, target)
+	return dijkstra(puzzle, false)
 }
 
-func dijkstra(puzzle [][]int, start, target Coord) int {
+func part2(puzzle [][]int) int {
+	return dijkstra(puzzle, true)
+}
 
+func dijkstra(puzzle [][]int, partTwo bool) int {
+
+	target := Coord{row: len(puzzle) - 1, col: len(puzzle[0]) - 1}
 	pq := make(PriorityQueue, 0)
 	visited := make(map[State]bool)
 
@@ -132,11 +140,18 @@ func dijkstra(puzzle [][]int, start, target Coord) int {
 		}
 		visited[state] = true
 		if state.loc == target {
-			return item.priority
+			if !partTwo || state.steps >= 4 {
+				return item.priority
+			}
 		}
 
-		neighbors := neighbors(state, len(puzzle), len(puzzle[0]))
-		for _, neighbor := range neighbors {
+		var neighborStates []State
+		if !partTwo {
+			neighborStates = neighbors(state, len(puzzle), len(puzzle[0]))
+		} else {
+			neighborStates = neighborsPartTwo(state, len(puzzle), len(puzzle[0]))
+		}
+		for _, neighbor := range neighborStates {
 
 			newHeat := item.priority + puzzle[neighbor.loc.row][neighbor.loc.col]
 			heap.Push(&pq, &Item{value: neighbor, priority: newHeat})
@@ -164,6 +179,34 @@ func neighbors(state State, rows, cols int) []State {
 		}
 		neighbors = append(neighbors, newState)
 	}
+	return neighbors
+}
+
+func neighborsPartTwo(state State, rows, cols int) []State {
+	neighbors := make([]State, 0)
+
+	for _, dir := range leftStraightRight(state.facing) {
+		c := Coord{row: state.loc.row + dir.row, col: state.loc.col + dir.col}
+		if c.col < 0 || c.col >= cols || c.row < 0 || c.row >= rows {
+			continue
+		}
+		if state.steps < 4 {
+			if dir == state.facing {
+				neighbors = append(neighbors, State{loc: c, facing: dir, steps: state.steps + 1})
+			}
+		} else {
+			newState := State{loc: c, facing: dir, steps: 1}
+			if dir == state.facing {
+				if state.steps >= 10 {
+					continue
+				} else {
+					newState.steps = state.steps + 1
+				}
+			}
+			neighbors = append(neighbors, newState)
+		}
+	}
+
 	return neighbors
 }
 
